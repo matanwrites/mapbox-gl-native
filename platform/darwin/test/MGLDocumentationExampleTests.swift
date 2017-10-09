@@ -278,6 +278,26 @@ class MGLDocumentationExampleTests: XCTestCase, MGLMapViewDelegate {
         //#-end-example-code
     }
     
+    func testMGLMapSnapshotter() {
+        //#-example-code
+        let camera = MGLMapCamera()
+        camera.centerCoordinate = CLLocationCoordinate2D(latitude: 37.7184, longitude: -122.4365)
+        camera.pitch = 20
+
+        let options = MGLMapSnapshotOptions(styleURL: MGLStyle.satelliteStreetsStyleURL(), camera: camera, size: CGSize(width: 320, height: 480))
+        options.zoomLevel = 10
+
+        let snapshotter = MGLMapSnapshotter(options: options)
+        snapshotter.start { (snapshot, error) in
+            if error != nil {
+                // error handler
+            } else {
+                // image handler
+            }
+        }
+        //#-end-example-code
+    }
+    
     // For testMGLMapView().
     func myCustomFunction() {}
 }
