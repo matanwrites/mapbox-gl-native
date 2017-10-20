@@ -1607,7 +1607,7 @@ public:
     id<MGLAnnotation>annotation = [self annotationForGestureRecognizer:singleTap persistingResults:YES];
     if(annotation)
     {
-        [self selectAnnotation:annotation animated:YES];
+        [self selectAnnotation:annotation forGestureRegognizer:singleTap animated:YES];
     }
     else
     {
@@ -3970,6 +3970,11 @@ public:
 
 - (void)selectAnnotation:(id <MGLAnnotation>)annotation animated:(BOOL)animated
 {
+    [self selectAnnotation:annotation forGestureRegognizer:nil animated:animated];
+}
+
+- (void)selectAnnotation:(id <MGLAnnotation>)annotation forGestureRegognizer:(UITapGestureRecognizer *)singleTap animated:(BOOL)animated
+{
     if ( ! annotation) return;
 
     if (annotation == self.selectedAnnotation) return;
@@ -3995,20 +4000,21 @@ public:
             MGLAnnotationContext &annotationContext = _annotationContextsByAnnotationTag.at(annotationTag);
             annotationView = annotationContext.annotationView;
             if (annotationView && annotationView.enabled) {
-            {
-                // Annotations represented by views use the view frame as the positioning rect.
-                positioningRect = annotationView.frame;
-                [annotationView.superview bringSubviewToFront:annotationView];
-                [annotationView setSelected:YES animated:animated];
+                {
+                    // Annotations represented by views use the view frame as the positioning rect.
+                    positioningRect = annotationView.frame;
+                    [annotationView.superview bringSubviewToFront:annotationView];
+                    [annotationView setSelected:YES animated:animated];
+                }
             }
         }
-    }
 
-     // The client can request that any annotation be selected (even ones that are offscreen).
-     // The annotation can’t be selected if no part of it is hittable.
+    // The client can request that any annotation be selected (even ones that are offscreen).
+    // The annotation will bounce to the current tap point as anchor.
     if ( ! CGRectIntersectsRect(positioningRect, self.bounds) && annotation != self.userLocation)
     {
-        return;
+        CGPoint tapPoint = [singleTap locationInView:self];
+        positioningRect = CGRectMake(tapPoint.x, tapPoint.y, positioningRect.size.width, positioningRect.size.height);
     }
 
     self.selectedAnnotation = annotation;
@@ -4055,7 +4061,7 @@ public:
             if ([calloutView.leftAccessoryView isKindOfClass:[UIControl class]])
             {
                 UITapGestureRecognizer *calloutAccessoryTap = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                  action:@selector(handleCalloutAccessoryTapGesture:)];
+                                                                                                      action:@selector(handleCalloutAccessoryTapGesture:)];
 
                 [calloutView.leftAccessoryView addGestureRecognizer:calloutAccessoryTap];
             }
@@ -4068,7 +4074,7 @@ public:
             if ([calloutView.rightAccessoryView isKindOfClass:[UIControl class]])
             {
                 UITapGestureRecognizer *calloutAccessoryTap = [[UITapGestureRecognizer alloc] initWithTarget:self
-                                                                  action:@selector(handleCalloutAccessoryTapGesture:)];
+                                                                                                      action:@selector(handleCalloutAccessoryTapGesture:)];
 
                 [calloutView.rightAccessoryView addGestureRecognizer:calloutAccessoryTap];
             }
