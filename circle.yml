@@ -33,7 +33,7 @@ workflows:
   nightly-node:
     triggers:
       - schedule:
-          cron: "0 18 * * *" # 11am pdt
+          cron: "0 20 * * *" # 1pm pdt
           filters:
             branches:
               only:
@@ -349,11 +349,12 @@ jobs:
       - *show-ccache-stats
       - *save-cache
       - *run-node-tests
+      - modify:
+          name: Modify package.json for nightly build
+          command: node platform/node/scripts/modify_remote_path.js
       - deploy:
-          name: Publish nightly build
-          command: |
-            DATE_STR=$(date -u +%Y-%m-%d)
-            ./node_modules/.bin/node-pre-gyp package publish info
+          name: Deploy nightly build to s3
+          command: ./node_modules/.bin/node-pre-gyp package publish info
       - *upload-render-tests
 
 # ------------------------------------------------------------------------------
